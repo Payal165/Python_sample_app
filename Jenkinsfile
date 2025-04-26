@@ -1,33 +1,43 @@
 pipeline {
     agent any
 
+    environment {
+        VENV = 'venv'
+    }
+
     stages {
+        stage('Clone') {
+            steps {
+                git 'https://github.com/Payal165/Python_sample_app.git'
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
-                sh 'python3 -m venv venv'
-                sh './venv/bin/pip install requirements.txt'
+                sh 'python3 -m venv ${VENV}'
+                sh './${VENV}/bin/pip install -r requirements.txt'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh './venv/bin/pytest'
+                sh './${VENV}/bin/pytest'
             }
         }
 
-        stage('Run App') {
+        stage('Deploy App') {
             steps {
-                sh './venv/bin/python app.py'
+                sh 'nohup ./${VENV}/bin/python app.py &'
             }
         }
     }
 
     post {
         success {
-            echo " Build and test successful!"
+            echo "✅ App deployed successfully!"
         }
         failure {
-            echo " Build failed."
+            echo "❌ Something went wrong."
         }
     }
 }
